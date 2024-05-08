@@ -17,7 +17,6 @@ const ChatSideBar = () => {
   const { isLoading } = useQuery("activeUsers", getActiveUsers, {
     refetchOnWindowFocus: false,
     onSuccess: (data) => {
-      console.log(data);
       setActiveUsers(() => {
         let users = [...(data || [])];
         const userNotInActiveUsers = !users.find(
