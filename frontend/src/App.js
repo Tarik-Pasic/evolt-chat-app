@@ -1,24 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
+import Home from "./components/Home";
+import "./App.css";
+import { randomStringGenerator } from "./utils";
+import { CircularProgress, CssBaseline, Box } from "@mui/material";
+import { QueryClientProvider, QueryClient } from "react-query";
+import socket from "./socket";
+
+const queryClient = new QueryClient();
 
 function App() {
+  const [ready, setReady] = useState(!!localStorage.getItem("username"));
+
+  useEffect(() => {
+    if (!localStorage.getItem("username")) {
+      localStorage.setItem("username", randomStringGenerator(10));
+      setReady(true);
+    }
+
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <SnackbarProvider>
+        <CssBaseline />
+        {!ready ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100vh"
+          >
+            <CircularProgress size={90} />
+          </Box>
+        ) : (
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </BrowserRouter>
+        )}
+      </SnackbarProvider>
+    </QueryClientProvider>
   );
 }
 
