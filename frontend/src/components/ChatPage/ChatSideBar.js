@@ -1,28 +1,30 @@
 import {
   Avatar,
-  Box,
   Badge,
-  Typography,
+  Box,
   CardHeader,
-  styled,
   CircularProgress,
+  Typography,
+  styled,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import socket from "../../socket";
 import { useQuery } from "react-query";
 import { getActiveUsers } from "../../api";
+import socket from "../../socket";
 
 const ChatSideBar = () => {
   const [activeUsers, setActiveUsers] = useState([]);
   const { isLoading } = useQuery("activeUsers", getActiveUsers, {
     refetchOnWindowFocus: false,
     onSuccess: (data) => {
+      console.log(data);
       setActiveUsers(() => {
         let users = [...(data || [])];
+        const userNotInActiveUsers = !users.find(
+          ({ userId }) => userId === localStorage.getItem("userId")
+        );
 
-        if (
-          !users.find(({ userId }) => userId === localStorage.getItem("userId"))
-        )
+        if (userNotInActiveUsers)
           users = [
             {
               username: localStorage.getItem("username"),

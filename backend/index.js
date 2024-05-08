@@ -47,9 +47,8 @@ io.on("connection", (socket) => {
 
     socket.emit("getUserInformation", userInformation);
     socket.broadcast.emit("activeUsers", userInformation);
+    socket.broadcast.emit("joinedGlobalChat", userInformation.username);
   });
-
-  //socket.broadcast.emit("joinedGlobalChat", data);
 
   socket.on("send_message", (data) => {
     socket.broadcast.emit("receive_message", data);

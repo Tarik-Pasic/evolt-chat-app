@@ -7,7 +7,7 @@ function Home() {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    function notifyUserJoined({ username }) {
+    function notifyUserJoined(username) {
       enqueueSnackbar(`User-${username} joined global chat`, {
         variant: "info",
         anchorOrigin: {
@@ -16,10 +16,6 @@ function Home() {
         },
       });
     }
-
-    socket.emit("joinGlobalChat", {
-      username: localStorage.getItem("username"),
-    });
 
     socket.on("joinedGlobalChat", notifyUserJoined);
 
