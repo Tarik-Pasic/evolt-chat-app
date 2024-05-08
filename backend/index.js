@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
+import randomStringGenerator from "./utils/randomStringGenerator.js";
 
 const app = express();
 
@@ -15,11 +16,14 @@ const io = new Server(server, {
   },
 });
 
-let activeUsers = [];
+let activeUsers = new Map();
 
-app.get("/activeUsers", async (req, res) => {
+app.get("/activeUsers", (req, res) => {
   try {
-    return res.status(200).send(activeUsers);
+    const activeUsersArray = Array.from(activeUsers).map(
+      ([userId, username]) => ({ userId, username })
+    );
+    return res.status(200).send(activeUsersArray);
   } catch (error) {
     console.error(error);
     return res.status(500).send(error);
@@ -29,21 +33,35 @@ app.get("/activeUsers", async (req, res) => {
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  socket.on("joinGlobalChat", (data) => {
-    const newUser = { username: data.username, id: socket.id };
-    activeUsers.push(newUser);
+  socket.on("registerUser", (data) => {
+    const userInformation = { ...data };
 
-    socket.broadcast.emit("joinedGlobalChat", data);
-    socket.broadcast.emit("activeUsers", newUser);
+    if (!userInformation.username)
+      userInformation.username = randomStringGenerator(10);
+
+    if (!userInformation.userId)
+      userInformation.userId = randomStringGenerator(20);
+
+    if (!activeUsers.has(userInformation.userId))
+      activeUsers.set(userInformation.userId, userInformation.username);
+
+    socket.emit("getUserInformation", userInformation);
+    socket.broadcast.emit("activeUsers", userInformation);
   });
+
+  //socket.broadcast.emit("joinedGlobalChat", data);
 
   socket.on("send_message", (data) => {
     socket.broadcast.emit("receive_message", data);
   });
 
+  socket.on("deleteActiveUser", (userId) => {
+    activeUsers.delete(userId);
+    console.log("User has been removed from active users.");
+    socket.broadcast.emit("disconnectedUser", userId);
+  });
+
   socket.on("disconnect", () => {
-    activeUsers = activeUsers.filter((user) => user.id !== socket.id);
-    socket.broadcast.emit("disconnectedUser", socket.id);
     console.log(`User disconnected: ${socket.id}`);
   });
 });

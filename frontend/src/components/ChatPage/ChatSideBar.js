@@ -21,13 +21,14 @@ const ChatSideBar = () => {
         let users = [...(data || [])];
 
         if (
-          !users.find(
-            ({ username }) => username === localStorage.getItem("username")
-          )
+          !users.find(({ userId }) => userId === localStorage.getItem("userId"))
         )
-          users = [{ username: localStorage.getItem("username") }].concat(
-            users
-          );
+          users = [
+            {
+              username: localStorage.getItem("username"),
+              userId: localStorage.getItem("userId"),
+            },
+          ].concat(users);
 
         return users;
       });
@@ -47,7 +48,7 @@ const ChatSideBar = () => {
       setActiveUsers((oldActiveUsers) => {
         const newActiveUsers = [...(oldActiveUsers || [])];
         const disconnectedUserIndex = newActiveUsers.findIndex(
-          (row) => row.id === disconnectedUser
+          (row) => row.userId === disconnectedUser
         );
         newActiveUsers.splice(disconnectedUserIndex, 1);
 
@@ -80,7 +81,7 @@ const ChatSideBar = () => {
             <CircularProgress />
           </Box>
         ) : (
-          activeUsers.map(({ username }, index) => (
+          activeUsers.map(({ username, userId }, index) => (
             <CardHeader
               key={index}
               avatar={
@@ -93,7 +94,7 @@ const ChatSideBar = () => {
                 </StyledBadge>
               }
               title={`User-${username} ${
-                username === localStorage.getItem("username") ? "(You)" : ""
+                userId === localStorage.getItem("userId") ? "(You)" : ""
               }`}
               sx={{
                 pl: "0",

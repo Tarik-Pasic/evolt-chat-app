@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import Home from "./components/Home";
 import "./App.css";
-import { randomStringGenerator } from "./utils";
 import { CircularProgress, CssBaseline, Box } from "@mui/material";
 import { QueryClientProvider, QueryClient } from "react-query";
 import socket from "./socket";
@@ -11,18 +10,37 @@ import socket from "./socket";
 const queryClient = new QueryClient();
 
 function App() {
-  const [ready, setReady] = useState(!!localStorage.getItem("username"));
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem("username")) {
-      localStorage.setItem("username", randomStringGenerator(10));
+    function registerUser() {
+      const userInformation = {
+        username: localStorage.getItem("username"),
+        userId: localStorage.getItem("userId"),
+      };
+
+      socket.emit("registerUser", userInformation);
+    }
+
+    function saveUserInformation(userInformation) {
+      localStorage.setItem("username", userInformation.username);
+      localStorage.setItem("userId", userInformation.userId);
       setReady(true);
     }
 
+    function cleanup() {
+      socket.emit("deleteActiveUser", localStorage.getItem("userId"));
+    }
+
     socket.connect();
+    registerUser();
+    socket.on("getUserInformation", saveUserInformation);
+    window.addEventListener("beforeunload", cleanup);
 
     return () => {
+      window.removeEventListener("beforeunload", cleanup);
       socket.disconnect();
+      socket.off("getUserInformation", saveUserInformation);
     };
   }, []);
 
