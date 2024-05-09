@@ -43,7 +43,8 @@ const ChatPage = ({ title, roomId, returnBack, initialData }) => {
   }, []);
 
   useEffect(() => {
-    if (initialData) setMessages(() => [...initialData]);
+    if (initialData)
+      setMessages((oldMessages) => [...initialData, ...oldMessages]);
   }, [initialData]);
 
   return (
