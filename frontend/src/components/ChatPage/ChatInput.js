@@ -3,7 +3,7 @@ import { useState } from "react";
 import { IoMdSend } from "react-icons/io";
 import socket from "../../socket";
 
-const ChatInput = ({ setMessages }) => {
+const ChatInput = ({ setMessages, roomId }) => {
   const [text, setText] = useState("");
   const theme = useTheme();
 
@@ -18,9 +18,10 @@ const ChatInput = ({ setMessages }) => {
         },
       ];
     });
-    socket.emit("send_message", {
+    socket.emit("sendMessage", {
       message: text,
       username: localStorage.getItem("username"),
+      roomId,
     });
   };
 
@@ -29,7 +30,11 @@ const ChatInput = ({ setMessages }) => {
   };
 
   return (
-    <Box display="flex" gap={2} p={2}>
+    <Box
+      display="flex"
+      gap={2}
+      p={2}
+    >
       <TextField
         sx={{
           bgcolor: "white",

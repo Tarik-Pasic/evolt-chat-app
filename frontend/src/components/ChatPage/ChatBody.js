@@ -3,12 +3,17 @@ import ChatMessage from "./ChatMessage";
 
 const ChatBody = ({ messages }) => {
   return (
-    <Box sx={{ overflowY: "scroll" }} width="100%" p="20px" flex="1 1 auto">
+    <Box
+      sx={{ overflowY: "scroll" }}
+      width="100%"
+      p="20px"
+      flex="1 1 auto"
+    >
       {messages.map(({ message, isMe, username }, index) => (
         <ChatMessage
           key={index}
           text={message}
-          isMe={isMe}
+          isMe={isMe || username === localStorage.getItem("username")}
           username={username}
           previousMessage={messages?.[index - 1]}
         />

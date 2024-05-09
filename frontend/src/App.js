@@ -1,11 +1,12 @@
+import { Box, CircularProgress, CssBaseline } from "@mui/material";
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SnackbarProvider } from "notistack";
-import Home from "./components/Home";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import { CircularProgress, CssBaseline, Box } from "@mui/material";
-import { QueryClientProvider, QueryClient } from "react-query";
+import Home from "./components/Home";
 import socket from "./socket";
+import PageReload from "./components/PageReload";
 
 const queryClient = new QueryClient();
 
@@ -32,15 +33,27 @@ function App() {
       socket.emit("deleteActiveUser", localStorage.getItem("userId"));
     }
 
+    function privateChatJoined(message) {
+      enqueueSnackbar(message, {
+        variant: "info",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+      });
+    }
+
     socket.connect();
     registerUser();
     socket.on("getUserInformation", saveUserInformation);
+    socket.on("privateChatJoined", privateChatJoined);
     window.addEventListener("beforeunload", cleanup);
 
     return () => {
       window.removeEventListener("beforeunload", cleanup);
       socket.disconnect();
       socket.off("getUserInformation", saveUserInformation);
+      socket.off("privateChatJoined", privateChatJoined);
     };
   }, []);
 
@@ -61,6 +74,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/private-chat/:id" element={<PageReload />} />
             </Routes>
           </BrowserRouter>
         )}

@@ -9,3 +9,8 @@ export const getActiveUsers = async () => {
   const { data } = await instance.get("/activeUsers");
   return data;
 };
+
+export const getGlobalMessages = async () => {
+  const { data } = await instance.get("/messages");
+  return data;
+};
