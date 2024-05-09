@@ -93,7 +93,8 @@ const ChatSideBar = () => {
       </Box>
       <Box
         height="100%"
-        p="20px"
+        p="10px"
+        pt="20px"
         sx={{
           display: {
             xs: "block",

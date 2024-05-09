@@ -31,7 +31,7 @@ const PrivateChat = ({ id, targetUsername }) => {
       window.removeEventListener("beforeunload", leavePrivateChat);
       socket.off("leftPrivateChat", userLeftPrivateChat);
     };
-  }, []);
+  }, [id]);
 
   return (
     <ChatPage
