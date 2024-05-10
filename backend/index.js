@@ -83,7 +83,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deleteActiveUser", (userId) => {
-    if (activeUsers.get(userId).socketId !== socket.id) return;
+    if (activeUsers.get(userId)?.socketId !== socket.id) return;
 
     activeUsers.delete(userId);
     console.log("User has been removed from active users.");
@@ -112,7 +112,7 @@ io.on("connection", (socket) => {
 
     const roomData = activeRooms.get(roomId);
 
-    if (!roomData) {
+    if (!roomData || !roomData?.[currentUserId]) {
       callback("not_exist");
       return;
     }
@@ -145,7 +145,7 @@ io.on("connection", (socket) => {
 
     const roomData = activeRooms.get(roomId);
 
-    if (!roomData) return;
+    if (!roomData || !roomData?.[currentUserId]) return;
 
     const allActiveUsers = Object.values(roomData).every((user) => user.active);
 
