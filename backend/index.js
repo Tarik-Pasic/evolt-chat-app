@@ -87,27 +87,11 @@ io.on("connection", (socket) => {
 
     const roomId = generateRoomId(currentUserId, targetUserId);
 
-    socket.leave("globalChat");
-    socket.join(roomId);
-
-    if (!activeRooms.has(roomId)) {
+    if (!activeRooms.has(roomId))
       activeRooms.set(roomId, {
-        [currentUserId]: { active: true },
+        [currentUserId]: { active: false },
         [targetUserId]: { active: false },
       });
-
-      socket
-        .to(activeUsers.get(targetUserId).socketId)
-        .emit("privateChatInitiated", activeUsers.get(currentUserId).username);
-    } else {
-      const roomData = activeRooms.get(roomId);
-      roomData[currentUserId].active = true;
-
-      io.to(roomId).emit(
-        "privateChatJoined",
-        "Both user have joined the chat room!"
-      );
-    }
 
     callback({
       roomId,
@@ -115,10 +99,45 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("joinPrivateChat", (data, callback) => {
+    const { currentUserId, roomId } = data;
+
+    const roomData = activeRooms.get(roomId);
+
+    if (!roomData) {
+      callback("not_exist");
+      return;
+    }
+
+    socket.leave("globalChat");
+    socket.join(roomId);
+
+    roomData[currentUserId].active = true;
+
+    const allActiveUsers = Object.values(roomData).every((user) => user.active);
+
+    if (allActiveUsers)
+      io.to(roomId).emit(
+        "privateChatJoined",
+        "Both user have joined the chat room!"
+      );
+    else {
+      const targetUserId = Object.keys(roomData).find(
+        (userId) => userId !== currentUserId
+      );
+
+      socket
+        .to(activeUsers.get(targetUserId).socketId)
+        .emit("privateChatInitiated", activeUsers.get(currentUserId).username);
+    }
+  });
+
   socket.on("leavePrivateChat", (data) => {
     const { roomId, currentUserId, username } = data;
 
     const roomData = activeRooms.get(roomId);
+
+    if (!roomData) return;
 
     const allActiveUsers = Object.values(roomData).every((user) => user.active);
 
