@@ -44,7 +44,7 @@ app.get("/messages", (req, res) => {
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  socket.on("registerUser", (data) => {
+  socket.on("registerUser", (data, callback) => {
     const userInformation = { ...data };
 
     if (!userInformation.username)
@@ -58,6 +58,10 @@ io.on("connection", (socket) => {
         username: userInformation.username,
         socketId: socket.id,
       });
+    else {
+      callback("alreadyRegistered");
+      return;
+    }
 
     socket.emit("getUserInformation", userInformation);
     socket.broadcast.emit("activeUsers", userInformation);
@@ -77,6 +81,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deleteActiveUser", (userId) => {
+    if (activeUsers.get(userId).socketId !== socket.id) return;
+
     activeUsers.delete(userId);
     console.log("User has been removed from active users.");
     socket.broadcast.emit("disconnectedUser", userId);

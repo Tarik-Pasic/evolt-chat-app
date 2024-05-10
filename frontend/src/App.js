@@ -20,7 +20,13 @@ function App() {
         userId: localStorage.getItem("userId"),
       };
 
-      socket.emit("registerUser", userInformation);
+      socket.emit("registerUser", userInformation, (response) => {
+        if (response === "alreadyRegistered") {
+          window.opener = null;
+          window.open("about:blank", "_self");
+          window.close();
+        }
+      });
     }
 
     function saveUserInformation(userInformation) {
