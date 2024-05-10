@@ -75,7 +75,9 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (data) => {
     const { roomId, ...restOfData } = data;
 
-    if (roomId === "globalChat") globalMessages.push(restOfData);
+    if (roomId === "globalChat") {
+      globalMessages.push(restOfData);
+    }
 
     socket.to(roomId).emit("receiveMessage", restOfData);
   });

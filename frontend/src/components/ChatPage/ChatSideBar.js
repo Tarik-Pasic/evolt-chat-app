@@ -136,7 +136,7 @@ const SideBarContent = ({ activeUsers, isLoading, setOpen }) => {
   const navigate = useNavigate();
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column">
       <Typography variant="h4" fontWeight="400" mt="30px" mb="20px">
         Active users
       </Typography>
